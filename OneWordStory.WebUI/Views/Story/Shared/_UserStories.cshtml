@@ -1,0 +1,89 @@
+﻿@model OneWordStory.WebUI.Models.StoryPage
+
+<h2>Your stories</h2>
+
+@using (Html.BeginForm("CreateNewStory", "Story"))
+{
+
+    <div style="display: inline;">
+        <input type="submit" id="" class="basic" value="Create New Story" />
+    </div>
+    
+    <div style="display: inline;">
+        @Html.TextBoxFor(m => m.WordForNewStory)
+    </div>
+    <div style="display: inline-flexbox;">
+        @Html.ValidationMessageFor(m => m.WordForNewStory)
+    </div>
+    
+    
+}
+
+<div id="StoryList"></div>
+
+
+<script type="html/template" id="ReadStoryTemplate">
+    <p>
+    <a href="/Story/ReadStory/{STORY_ID}">{PREVIEW}</a>    
+    </p>
+</script>
+
+<script>
+
+
+    function DisplayStories()
+    {
+
+        
+
+        $.ajax({
+            url: '/Story/GetStories',
+            dataType: 'json',
+            type: 'POST'
+        })
+        .success(function (result) {
+
+            
+            if (result.UserStories.length < 1)
+            {
+                
+                $("#StoryList").html("<p>You have no stories.</p>");
+                return;
+            }
+            
+            
+
+            var list = [];
+            $.each(result.UserStories, function (index, value) {
+                var template = $("#ReadStoryTemplate").clone().html();
+                var html = template.replace("{PREVIEW}", value.Preview);
+                html = html.replace("{STORY_ID}", value.Id.replace("stories\/", ""));
+                list.push(html);
+            });
+
+
+            $("#StoryList").html(list.join(""))
+
+            if (result.IsStale)
+            {
+                
+                counter++;
+                $("#StoryList").append("<span class='typeout'>Updating...</span>");
+                setTimeout(DisplayStories, 1000);
+            }
+            
+
+        })
+        .error(function (xhRequest, ErrorText, thrownError) {
+            
+        });
+    }
+
+    $(function () {
+        DisplayStories();
+        
+    });
+    
+</script>
+
+

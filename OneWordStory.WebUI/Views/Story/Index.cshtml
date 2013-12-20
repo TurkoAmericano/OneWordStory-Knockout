@@ -1,0 +1,17 @@
+﻿@model OneWordStory.WebUI.Models.StoryPage
+@using Extensions;
+
+
+@{
+    ViewBag.Title = "Index";
+    Layout = "~/Views/Shared/_Layout.cshtml";
+}
+
+
+@section StoryList
+    {
+
+   
+    @Html.Partial("Shared/_UserStories")
+
+}

@@ -1,0 +1,80 @@
+﻿@model OneWordStory.WebUI.Models.Login
+@{
+    ViewBag.Title = "Welcome to One Word Story";
+    Layout = "~/Views/Shared/_Layout.cshtml";
+}
+
+
+<script>
+
+
+    var replacePasswordBox = function (type) {
+        "use strict";
+        var oldField = type === "password" ? "passwordShown" : "passwordHidden";
+        var newField = type === "password" ? "passwordHidden" : "passwordShown";
+
+        var $passwordBox = $(document.createElement('input'));
+        $passwordBox.attr({ type: type, id: newField, name: newField, value: $("#Password").val(), onkeyup: "SyncToHidden(this)" });
+        $passwordBox.attr("data-val", "true");
+        $passwordBox.attr("data-val-required", "Password is required.");
+
+        $("#" + oldField).replaceWith($passwordBox);
+        $passwordBox.focus();
+
+    }
+
+    var showHideButton_Click = function (span) {
+        "use strict";
+        if (span.innerText == "hide") {
+            replacePasswordBox("password");
+            span.innerText = "show";
+        }
+        else {
+            replacePasswordBox("text");
+            span.innerText = "hide";
+        }
+
+    }
+
+    var syncToHidden = function (box) {
+        "use strict";
+        $("#Password").val(box.value);
+    }
+
+</script>
+
+
+
+
+        If you haven't registered yet, just fill in your email and password and an account will be created for you.
+
+        @using (Html.BeginForm("Login", "Home"))
+        {
+
+            <fieldset>
+            <ul class="form">
+                <li>Email:</li>
+                <li>@Html.EditorFor(m => m.Email)<br />
+                    @Html.ValidationMessageFor(m => m.Email)</li>
+                <li>Password: </li>
+
+                <li>
+                    <input id="passwordShown" name="passwordShown" type="text" value="" onkeyup="SyncToHidden(this)" autocomplete="off" />
+                    <span id="showHideButton" class="ShowHide" onclick="showHideButton_Click(this)">hide</span>
+                    <br />
+                    @Html.ValidationMessageFor(m => m.Password)
+
+                </li>
+                <li>
+                    <input type="submit" class="btn-primary" value="Login" name="action:Login" />
+
+
+                    @Html.HiddenFor(m => m.Password)
+                </li>
+            </ul>
+                </fieldset>
+        }
+
+
+
+
