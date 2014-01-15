@@ -1,16 +1,31 @@
 ﻿fieldset ul, fieldset li{
 border:0; margin:0; padding:0; list-style:none;
 }
-fieldset li{
-clear:both;
-list-style:none;
-padding-bottom:10px;
+
+/* styles for validation helpers */
+.field-validation-error {
+    color: #e80c4d;
+    font-weight: bold;
 }
 
-fieldset input{
-float:left;
+.field-validation-valid {
+    display: none;
 }
-fieldset label{
-width:140px;
-float:left;
+
+input.input-validation-error {
+    border: 1px solid #e80c4d;
+}
+
+input[type="checkbox"].input-validation-error {
+    border: 0 none;
+}
+
+.validation-summary-errors {
+    color: #e80c4d;
+    font-weight: bold;
+    font-size: 1.1em;
+}
+
+.validation-summary-valid {
+    display: none;
 }

@@ -8,38 +8,52 @@
 <script>
 
 
+
+
+
+    var onLoad  = function()
+    {
+        setEvents();
+    }
+
+    var setEvents = function ()
+    {
+        $('#showHideButton').click(showHideButton);
+
+    }
+
     var replacePasswordBox = function (type) {
         "use strict";
-        var oldField = type === "password" ? "passwordShown" : "passwordHidden";
-        var newField = type === "password" ? "passwordHidden" : "passwordShown";
 
-        var $passwordBox = $(document.createElement('input'));
-        $passwordBox.attr({ type: type, id: newField, name: newField, value: $("#Password").val(), onkeyup: "SyncToHidden(this)" });
-        $passwordBox.attr("data-val", "true");
-        $passwordBox.attr("data-val-required", "Password is required.");
+        var $passwordBox = $('#password').clone();
+        $passwordBox.attr('type', type);
 
-        $("#" + oldField).replaceWith($passwordBox);
+        $("#password").replaceWith($passwordBox);
         $passwordBox.focus();
 
     }
 
-    var showHideButton_Click = function (span) {
+    var showHideButton = function () {
         "use strict";
-        if (span.innerText == "hide") {
+
+        if (this.innerText == "hide") {
             replacePasswordBox("password");
-            span.innerText = "show";
+            this.innerText = "show";
         }
         else {
             replacePasswordBox("text");
-            span.innerText = "hide";
+            this.innerText = "hide";
         }
 
     }
 
-    var syncToHidden = function (box) {
+    var syncToHidden = function () {
         "use strict";
-        $("#Password").val(box.value);
+
+        $("#Password").val($(this).val());
     }
+
+    $(onLoad);
 
 </script>
 
@@ -54,14 +68,14 @@
             <fieldset>
             <ul class="form">
                 <li>Email:</li>
-                <li>@Html.EditorFor(m => m.Email)<br />
-                    @Html.ValidationMessageFor(m => m.Email)</li>
+                <li>@Html.EditorFor(m => m.Email)</li>
+                <li>@Html.ValidationMessageFor(m => m.Email)</li>
                 <li>Password: </li>
 
                 <li>
-                    <input id="passwordShown" name="passwordShown" type="text" value="" onkeyup="SyncToHidden(this)" autocomplete="off" />
-                    <span id="showHideButton" class="ShowHide" onclick="showHideButton_Click(this)">hide</span>
-                    <br />
+                    <input id="password" name="password" type="text" value="" autocomplete="off" />
+                    <span id="showHideButton" class="ShowHide">hide</span>
+                    </li><li>
                     @Html.ValidationMessageFor(m => m.Password)
 
                 </li>
@@ -69,7 +83,7 @@
                     <input type="submit" class="btn-primary" value="Login" name="action:Login" />
 
 
-                    @Html.HiddenFor(m => m.Password)
+                    
                 </li>
             </ul>
                 </fieldset>
