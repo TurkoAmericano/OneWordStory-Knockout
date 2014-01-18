@@ -29,6 +29,7 @@ namespace OneWordStory.WebUI.Controllers
         {
             _repository = repository;
             _authWrapper = authWrapper;
+            
         }
 
         public ActionResult Index()
@@ -81,7 +82,7 @@ namespace OneWordStory.WebUI.Controllers
             }
             else
             {
-                ModelState.AddModelError("login", "Login failed.");
+                ViewBag.Error = "Login failed";
                 return View("Index");
             }
 

@@ -17,11 +17,14 @@ namespace OneWordStory.WebUI.Models
         [RegularExpression("^[a-zA-Z0-9]+$", ErrorMessage="Please enter only letters and/or numbers")]
         public string WordForNewStory { get; set; }
 
+        
+
         [JsonIgnore]
-        public string ReadStory { get; set; }
+        public Story ReadStory { get; set; }
 
         public bool IsStale { get; set; }
 
+        
 
         public StoryPage()
         {

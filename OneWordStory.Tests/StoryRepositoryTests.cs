@@ -25,37 +25,9 @@ namespace OneWordStory.Tests
         {
             
             // Setup
-            IDocumentStore store = Global.GetInMemoryStore();
-
-            User user = FakeEntityFactory.GetGenericUser();
-
-            Story story1;
-            Story story2;
-            Story story3;
-            Story story4;
-            Story story5;
-
-            using (var session = store.OpenSession())
-            {
-                session.Store(user);
-                story1 = FakeEntityFactory.GetGenericStory(user.Id);
-                story2 = FakeEntityFactory.GetGenericStory(user.Id);
-                story3 = FakeEntityFactory.GetGenericStory(user.Id);
-                story4 = FakeEntityFactory.GetGenericStory(user.Id);
-                story5 = FakeEntityFactory.GetGenericStory(user.Id);
-                session.Store(story1);
-                session.Store(story2);
-                session.Store(story3);
-                session.Store(story4);
-                session.Store(story5);
-                session.SaveChanges();
-
-                UpdateIndex(session);
-
-
-                var st = session.Query<Story>().ToList<Story>();
-
-            }
+            IDocumentStore store;
+            User user;
+            var stories = CreateFakeStories(out store, out user, 5);
 
             // Act
             IStoryRepository rep = new StoryRepository(store);
@@ -63,13 +35,42 @@ namespace OneWordStory.Tests
 
             // Assert
             Assert.AreEqual(result.Count(), 5);
-            Assert.IsTrue(result.Where(s => s.Paragraphs.Contains(story1.Paragraphs[0])).Count() > 0);
-            Assert.IsTrue(result.Where(s => s.Paragraphs.Contains(story2.Paragraphs[0])).Count() > 0);
-            Assert.IsTrue(result.Where(s => s.Paragraphs.Contains(story3.Paragraphs[0])).Count() > 0);
-            Assert.IsTrue(result.Where(s => s.Paragraphs.Contains(story4.Paragraphs[0])).Count() > 0);
-            Assert.IsTrue(result.Where(s => s.Paragraphs.Contains(story5.Paragraphs[0])).Count() > 0);
 
+            foreach (var story in stories)
+            {
+                Assert.IsTrue(result.Where(s => s.Paragraphs.Contains(story.Paragraphs[0])).Count() > 0);    
+            }
 
+            
+            
+
+        }
+
+        private static List<Story> CreateFakeStories(out IDocumentStore store, out User user, int numberOfStories)
+        {
+            store = Global.GetInMemoryStore();
+
+            user = FakeEntityFactory.GetGenericUser();
+
+            
+
+            using (var session = store.OpenSession())
+            {
+                session.Store(user);
+
+                for (int i = 1; i <= numberOfStories; i++)
+                {
+                    var story = FakeEntityFactory.GetGenericStory(user.Id);
+                    session.Store(story);
+                }
+
+                session.SaveChanges();
+
+                UpdateIndex(session);
+
+                return session.Query<Story>().ToList<Story>();
+
+            }
         }
 
 
@@ -122,7 +123,7 @@ namespace OneWordStory.Tests
 
             // Assert
             Assert.IsNotNull(story.Paragraphs);
-            Assert.IsNotNull(story.CurrentEditor);
+            Assert.IsNotNull(story.LastEditorId);
             Assert.IsNotNull(story.EditHistory);
 
         }
@@ -144,17 +145,66 @@ namespace OneWordStory.Tests
         [Test]
         public void GetStoriesByUserOrderTest()
         {
+            
             // Setup
-
+            IDocumentStore store;
+            User user;
+            var stories = CreateFakeStories(out store, out user, 10);
 
             // Act
+            StoryRepository repository = new StoryRepository(store);
+            var result = repository.GetStoriesByUser(user.Id);
 
+            var sortedResult = result.Stories.OrderBy(s => s.DocumentId).ToList();
 
             // Assert
-            Assert.Inconclusive();
+            for (int i = 0; i < result.Stories.Count; i++)
+            {
+                Assert.AreEqual(result.Stories[i].DocumentId, sortedResult[i].DocumentId);
+            }
 
         }
+
         
+        [Test]
+        public void StartNewParagraphTest()
+        {
+            // Setup
+            IDocumentStore store = Global.GetInMemoryStore();
+
+            var repository = new StoryRepository(store);
+
+            var wordToAdd = "Hey";
+
+            var story = FakeEntityFactory.GetGenericStory("users/1");
+
+            var numberofParagraphs = story.Paragraphs.Count;
+
+            using (var session = store.OpenSession())
+            {
+                
+                session.Store(story);
+                session.SaveChanges();
+            }
+
+            
+
+            // Act
+            repository.AddWord(story.Id, wordToAdd, "users/1", true);
+
+            // Assert
+            using (var session = store.OpenSession())
+            {
+                UpdateIndex(session);
+                var resultStory = session.Load<Story>(story.Id);
+                Assert.AreEqual(resultStory.Paragraphs.Count, numberofParagraphs + 1);
+                Assert.AreEqual(resultStory.Paragraphs[numberofParagraphs], wordToAdd);
+            }
+            
+            
+
+        }
+
         [Test]
         public void GetSecondPageTest()
         {
@@ -207,13 +257,11 @@ namespace OneWordStory.Tests
         public void PageSizeWithNoPageNoReturnsError()
         {
             // Setup
-
-
+            IDocumentStore store = Global.GetInMemoryStore();
+            StoryRepository repository = new StoryRepository(store);
+            
             // Act
-
-
-            // Assert
-            Assert.Inconclusive();
+            Assert.Throws<ArgumentException>(() => repository.GetStoriesByUser("string", pageSize: 5), "Must include Page No with Page Size");
 
         }
 
@@ -222,13 +270,14 @@ namespace OneWordStory.Tests
         public void PageNoWithNoPageSizeReturnsError()
         {
             // Setup
+            IDocumentStore store = Global.GetInMemoryStore();
+            StoryRepository repository = new StoryRepository(store);
 
 
             // Act
+            Assert.Throws<ArgumentException>(() => repository.GetStoriesByUser("string", 2), "Must include Page Size with Page No");
 
-
-            // Assert
-            Assert.Inconclusive();
+            
 
         }
         [Test]
@@ -237,7 +286,7 @@ namespace OneWordStory.Tests
             // Setup
             Story story = new Story()
             {
-                CurrentEditor = new User() { Email = "email@email.com", Password = "asdjhaksjdh" },
+                
                 EditHistory = new List<EditHistory>() { 
                     new EditHistory() {
                         DateAdded = DateTime.Now.AddHours(-1),  
@@ -276,7 +325,6 @@ namespace OneWordStory.Tests
             var savedStory = repository.GetStoryById(story.Id);
 
             // Assert
-            Global.AreEqualByJson(story.CurrentEditor, savedStory.CurrentEditor);
             Global.AreEqualByJson(story.EditHistory, savedStory.EditHistory);
             Assert.AreEqual(story.Id, savedStory.Id);
             Global.AreEqualByJson(story.Paragraphs, savedStory.Paragraphs);
@@ -321,7 +369,7 @@ namespace OneWordStory.Tests
             {
                 var story = session.Load<Story>(result.Story.Id);
 
-                Assert.IsNullOrEmpty(story.CurrentEditor.Id);
+                Assert.AreEqual(story.LastEditorId, userId);
                 Assert.IsNotNull(story.EditHistory);
                 Assert.Greater(story.EditHistory[0].DateAdded, DateTime.Now.AddMinutes(-1));
 

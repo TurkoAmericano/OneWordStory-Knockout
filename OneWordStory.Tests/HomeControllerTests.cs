@@ -64,8 +64,7 @@ namespace OneWordStory.Tests
 
             // Assert
             mockRepository.VerifyAll();
-            Assert.IsFalse(result.IsValidModelState());
-            Assert.AreEqual(result.GetErrorMessage(0), "Login failed.");
+            Assert.AreEqual(controller.ViewBag.Error, "Login failed");
             result.AssertViewResult(controller, "Index");
             
             

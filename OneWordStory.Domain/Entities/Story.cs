@@ -14,14 +14,30 @@ namespace OneWordStory.Domain.Entities
         
         public List<string> Paragraphs { get; set; }
         public string CurrentEditorId { get; set; }
-        public User CurrentEditor { get; set; }
+
+        
+        [JsonIgnore]
+        public string LastEditorId
+        {
+            get
+            {
+                
+                if (EditHistory.Count > 0)
+                    return EditHistory[0].UserId;
+                else
+                    return string.Empty;
+                    
+            }
+            
+        }
         public List<EditHistory> EditHistory { get; set; }
 
         public Story()
         {
             Paragraphs = new List<string>();
             EditHistory = new List<EditHistory>();
-            CurrentEditor = new User();
+            
+            
         }
 
         [JsonIgnore]
@@ -65,7 +81,6 @@ namespace OneWordStory.Domain.Entities
     public class EditHistory
     {
         public string UserId { get; set; }
-        public User User { get; set; }
         public int ParagraphNumber { get; set; }
         public int ParagraphIndex { get; set; }
         public DateTime DateAdded { get; set; }

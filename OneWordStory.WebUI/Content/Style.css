@@ -20,10 +20,18 @@ input[type="checkbox"].input-validation-error {
     border: 0 none;
 }
 
-.validation-summary-errors {
+.error-message
+{
+    color: #e80c4d;
+}
+
+.validation-summary-errors li
+{
     color: #e80c4d;
     font-weight: bold;
     font-size: 1.1em;
+    list-style-type: none;
+    
 }
 
 .validation-summary-valid {

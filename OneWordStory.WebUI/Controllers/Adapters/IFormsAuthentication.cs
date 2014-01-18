@@ -8,5 +8,6 @@ namespace OneWordStory.WebUI.Controllers.Adapters
     public interface IFormsAuthentication
     {
         void SetAuthCookie(string userName, bool createPersistantCookie);
+
     }
 }

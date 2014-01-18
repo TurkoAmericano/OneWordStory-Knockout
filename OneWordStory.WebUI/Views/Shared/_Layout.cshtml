@@ -16,46 +16,37 @@
 </head>
 <body>
 
+    
 
-    <div class="container">
+    <div class="col-lg-12">
 
-    <div class="row-fluid">
-       <div class="title">One Word Story</div>
-        <div class="login">
-            
+    
+       <div class="jumbotron">
+                
+          <h1>One Word Story</h1>    
+       
+            <div style="float:right;">
             @if(User.Identity.IsAuthenticated && ViewBag.HideLogin == null)
             {
                 @Html.ActionLink("Logout", "Logout", "Home")
             }
-
-        </div>
-    </div>
-
-    <div class="row-fluid">
-
-
-        <div class="col-md-3">
-            @RenderSection("StoryList", false)
-
+            </div>
+       
         </div>
 
-        <div class="col-md-6">
+    
+
+
+        
 
             @RenderBody()
 
+        
         </div>
-
-        <div class="col-md-3">
-            &nbsp;
-
-        </div>
+        
 
 
-    </div>
-
-    <div id="row-fluid">
-
-    </div>
+    
 
 </body>
 </html>

@@ -13,7 +13,7 @@ namespace OneWordStory.Domain.Abstract
     {
 
         Story GetStoryById(string storyId);
-        AddWordResult AddWord(string storyID, string word, string userId);
+        AddWordResult AddWord(string storyID, string word, string userId, bool addParagraph = false);
         StoryErrorCode LockStory(string storyId, string userId);
         GetStoriesResult GetStoriesByUser(string userId, int pageNo = 0, int pageSize = 0);
         List<Story> GetRandomStories(int amount);

@@ -13,6 +13,7 @@ using OneWordStory.WebUI.Controllers;
 using OneWordStory.WebUI.Controllers.Adapters;
 using OneWordStory.WebUI.Models;
 using Raven.Client;
+using Extensions;
 
 namespace OneWordStory.Tests
 {
@@ -71,23 +72,30 @@ namespace OneWordStory.Tests
 
 
             // Act
-            StoryPage result = (StoryPage)((ViewResult)controller.ReadStory(1)).Model;
-            
+            Story result = (Story)controller.ReadStory(1).Data;
+                        
 
             // Assert
-            Assert.IsTrue(result.ReadStory == "<p>123</p><p>456</p><p>789</p>");
+            Assert.AreEqual(result.Paragraphs[0], "123");
+            Assert.AreEqual(result.Paragraphs[1], "456");
+            Assert.AreEqual(result.Paragraphs[2], "789");
+
 
         }
+
         
+
+
         [Test]
         public void AddWordCreatesANewStory()
         {
             // Setup
             Mock<IStoryRepository> mock = new Mock<IStoryRepository>();
+            
             mock.Setup(m => m.AddWord(
                             It.Is<string>(s => s == ""), 
                             It.Is<string>(w => w == "Once"),
-                            It.Is<string>(u => u == "users/1")))
+                            It.Is<string>(u => u == "users/1"), false))
                             .Returns(new AddWordResult 
                             {
                                  ErrorCode = StoryErrorCode.Success,

@@ -47,16 +47,9 @@ namespace OneWordStory.WebUI.Controllers
             {
                 var storyResult = _repository.GetStoryById("stories/" + id);
 
-                var sb = new StringBuilder();
 
-                foreach (string paragraph in storyResult.Paragraphs)
-                {
-                    sb.Append("<p>");
-                    sb.Append(paragraph);
-                    sb.Append("</p>");
-                }
 
-                storyPage.ReadStory = sb.ToString();
+                storyPage.ReadStory = storyResult;
             }
 
             return storyPage;
@@ -80,6 +73,13 @@ namespace OneWordStory.WebUI.Controllers
 
         }
 
+        [HttpPost]
+        public JsonResult AddWord(StoryPage storyPage)
+        {
+            throw new NotImplementedException();
+
+        }
+
 
         public ActionResult CreateNewStory(StoryPage storyPage)
         {
@@ -92,12 +92,14 @@ namespace OneWordStory.WebUI.Controllers
         
         }
 
-        public ActionResult ReadStory(int id)
+        public JsonResult ReadStory(int id)
         {
 
             if (id < 1) throw new ArgumentException("Story Id");
 
-            return View("Index", GetStoryPage(id));
+            var story = _repository.GetStoryById("stories/" + id);
+
+            return Json(story, "application/json");
         }
 
 

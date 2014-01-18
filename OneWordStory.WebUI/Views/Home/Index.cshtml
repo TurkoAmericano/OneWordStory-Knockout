@@ -65,6 +65,7 @@
         @using (Html.BeginForm("Login", "Home"))
         {
 
+            <span class="error-message">@ViewBag.Error</span>
             <fieldset>
             <ul class="form">
                 <li>Email:</li>
@@ -77,10 +78,11 @@
                     <span id="showHideButton" class="ShowHide">hide</span>
                     </li><li>
                     @Html.ValidationMessageFor(m => m.Password)
+                        
 
                 </li>
                 <li>
-                    <input type="submit" class="btn-primary" value="Login" name="action:Login" />
+                    <input type="submit" class="btn-primary" value="Login"  />
 
 
                     

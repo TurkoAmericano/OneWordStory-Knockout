@@ -287,7 +287,7 @@ namespace OneWordStory.Tests
 
             // Assert
             Assert.IsNotNull(story.Paragraphs);
-            Assert.IsNotNull(story.CurrentEditor);
+            Assert.IsNotNull(story.LastEditorId);
             Assert.IsNotNull(story.EditHistory);
 
         }

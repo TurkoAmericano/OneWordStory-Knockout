@@ -38,6 +38,9 @@ namespace OneWordStory.Concrete
         public GetStoriesResult GetStoriesByUser(string userId, int pageNo = 0, int pageSize = 0)
         {
 
+            if (pageNo > 0 && pageSize < 1) throw new ArgumentException("Must include Page Size with Page No");
+            if (pageSize > 0 && pageNo < 1) throw new ArgumentException("Must include Page No with Page Size");
+
             using (var session = _store.OpenSession())
             {
                 var stats = new RavenQueryStatistics();
@@ -75,7 +78,7 @@ namespace OneWordStory.Concrete
 
         }
 
-        public AddWordResult AddWord(string storyId, string word, string userId)
+        public AddWordResult AddWord(string storyId, string word, string userId, bool addParagraph = false)
         {
 
             if (string.IsNullOrEmpty(word)) throw new ArgumentNullException("word");
@@ -92,7 +95,7 @@ namespace OneWordStory.Concrete
             }
             else
             {
-                var result = AddToExistingStory(word, userId, storyId);
+                var result = AddToExistingStory(word, userId, storyId, addParagraph);
                 return result;
             }
 
@@ -100,7 +103,7 @@ namespace OneWordStory.Concrete
 
         }
 
-        private AddWordResult AddToExistingStory(string word, string userId, string storyId)
+        private AddWordResult AddToExistingStory(string word, string userId, string storyId, bool addParagraph)
         {
             using (var session = _store.OpenSession())
             {
@@ -110,19 +113,31 @@ namespace OneWordStory.Concrete
                 if (story.HasEditor) throw new StoryHasEditorException();
 
                 if (story.HasEditHistory && story.EditHistory.Last<EditHistory>().UserId == userId)
-                    return new AddWordResult() { ErrorCode = StoryErrorCode.UserAddedTheLastWordInThisStory, Story = story }; 
+                    return new AddWordResult() { ErrorCode = StoryErrorCode.UserAddedTheLastWordInThisStory, Story = story };
 
-                int currentParagraphIndex = story.Paragraphs.Count - 1;
-                int preAddParagraphLength = story.Paragraphs[currentParagraphIndex].Length;
 
-                string lastParagraph = story.Paragraphs[currentParagraphIndex];
-                lastParagraph += " " + word;
-                story.Paragraphs[currentParagraphIndex] = lastParagraph;
+                if (addParagraph)
+                {
+                    story.Paragraphs.Add("");
+                }
+                else
+                {
+                    word = " " + word;
+                }
+                
+                int paragraphIndex = story.Paragraphs.Count - 1;
+
+                int preAddParagraphLength = story.Paragraphs[paragraphIndex].Length;
+                string lastParagraph = story.Paragraphs[paragraphIndex];
+                
+                lastParagraph += word;
+                story.Paragraphs[paragraphIndex] = lastParagraph;
+                
                 story.EditHistory.Add(new EditHistory()
                 {
                     DateAdded = DateTime.Now,
                     ParagraphIndex = preAddParagraphLength + 1,
-                    ParagraphNumber = currentParagraphIndex + 1,
+                    ParagraphNumber = paragraphIndex + 1,
                     UserId = userId
 
                 });
