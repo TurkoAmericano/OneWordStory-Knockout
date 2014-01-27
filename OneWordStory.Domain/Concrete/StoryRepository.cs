@@ -110,10 +110,14 @@ namespace OneWordStory.Concrete
                 var story = session.Load<Story>(storyId);
                 if (story == null) return new AddWordResult() { ErrorCode = StoryErrorCode.StoryNotFoundInRepository, Story = new Story() }; 
 
-                if (story.HasEditor) throw new StoryHasEditorException();
+                if (story.HasEditor 
+                    && story.Lock.UserId != userId
+                    && story.Lock.LockedDate > DateTime.Now.AddMinutes(-10)) throw new StoryHasEditorException();
 
                 if (story.HasEditHistory && story.EditHistory.Last<EditHistory>().UserId == userId)
                     return new AddWordResult() { ErrorCode = StoryErrorCode.UserAddedTheLastWordInThisStory, Story = story };
+
+                if (story.Lock.UserId == userId && story.Lock.LockedDate < DateTime.Now.AddMinutes(-10)) return new AddWordResult() { ErrorCode = StoryErrorCode.TenMinuteLockWindowHasClosed, Story = new Story() };
 
 
                 if (addParagraph)
@@ -184,9 +188,10 @@ namespace OneWordStory.Concrete
                 var story = session.Load<Story>(storyId);
                 if (story == null) return StoryErrorCode.Unknown;
 
-                if (!string.IsNullOrEmpty(story.CurrentEditorId)) return StoryErrorCode.StoryLockedForEditing;
+                if (!string.IsNullOrEmpty(story.Lock.UserId) && story.Lock.UserId != userId) return StoryErrorCode.StoryLockedForEditing;
 
-                story.CurrentEditorId = userId;
+                story.Lock.UserId = userId;
+                story.Lock.LockedDate = DateTime.Now;
 
                 try
                 {

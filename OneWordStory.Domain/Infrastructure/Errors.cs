@@ -18,6 +18,8 @@ namespace OneWordStory.Domain.Infrastructure
             StoryLockedForEditing,
             [Description("This story is currently being updated. Please try again in a minute.")]
             StoryIsBeingUpdated,
+            [Description("More than ten minutes have passed since you locked this story. Click 'Add word' to re-lock the story.")]
+            TenMinuteLockWindowHasClosed,
             [Description("An unknown error has occurred.")]
             StoryNotFoundInRepository,
             [Description("An unknown error has occurred.")]

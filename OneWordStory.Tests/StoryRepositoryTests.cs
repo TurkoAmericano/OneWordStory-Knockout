@@ -332,6 +332,35 @@ namespace OneWordStory.Tests
         }
 
 
+
+        
+        [Test]
+        public void AllowsALockIfYouveAlreadyLockedIt()
+        {
+            // Setup
+            var store = Global.GetInMemoryStore();
+
+            var userId = "users/1";
+
+            var story = FakeEntityFactory.GetGenericStory(userId);
+            story.Lock.UserId = userId;
+            
+
+            using (var session = store.OpenSession())
+            {
+                session.Store(story);
+                session.SaveChanges();
+            }
+
+            // Act
+            StoryRepository repo = new StoryRepository(store);
+            var result = repo.LockStory("stories/1", userId);
+
+            // Assert
+            Assert.AreEqual(result, StoryErrorCode.Success);
+
+        }
+
         [Test]
         public void AddWordThrowsExceptionsIfWordOrUserIdIsNullOrEmpty()
         {
@@ -350,6 +379,99 @@ namespace OneWordStory.Tests
 
         }
 
+
+        
+        [Test]
+        public void AddWordAllowsUserToAddWordIfUserIsCurrentEditor()
+        {
+
+            // Setup
+            var store = Global.GetInMemoryStore();
+            var userId = "users/1";
+            var word = "New";
+            var story = FakeEntityFactory.GetGenericStory(userId);
+            story.Lock.UserId = userId;
+            story.Lock.LockedDate = DateTime.Now.AddMinutes(-8);
+
+            using (var session = store.OpenSession())
+            {
+                session.Store(story);
+                session.SaveChanges();
+                UpdateIndex(session);
+            }
+
+            // Act
+            StoryRepository repository = new StoryRepository(store);
+            var result = repository.AddWord(story.Id, word, userId);
+
+            // Assert
+            Assert.AreEqual(result.ErrorCode, StoryErrorCode.Success);
+            Assert.IsTrue(result.Story.Paragraphs.Last().EndsWith(word));
+            
+
+        }
+
+
+
+        [Test]
+        public void AddWordWorksIfTenMinuteWindowHasPassed()
+        {
+
+            // Setup
+            var store = Global.GetInMemoryStore();
+            var userId = "users/1";
+            var userId2 = "users/2";
+            var word = "New";
+            var story = FakeEntityFactory.GetGenericStory(userId);
+            story.Lock.UserId = userId;
+            story.Lock.LockedDate = DateTime.Now.AddMinutes(-15);
+
+            using (var session = store.OpenSession())
+            {
+                session.Store(story);
+                session.SaveChanges();
+                UpdateIndex(session);
+            }
+
+            StoryRepository repository = new StoryRepository(store);
+            var result = repository.AddWord(story.Id, word, userId2);
+            // Act
+
+
+            // Assert
+            Assert.AreEqual(result.ErrorCode, StoryErrorCode.Success);
+            Assert.IsTrue(result.Story.Paragraphs.Last().EndsWith(word));
+
+        }
+        
+        
+        [Test]
+        public void AddWordTenMinutesAfterLockReturnsError()
+        {
+            
+            // Setup
+            var store = Global.GetInMemoryStore();
+            var userId = "users/1";
+            var story = FakeEntityFactory.GetGenericStory(userId);
+            story.Lock.UserId = userId;
+            story.Lock.LockedDate = DateTime.Now.AddMinutes(-15);
+
+            using (var session = store.OpenSession())
+            {
+                session.Store(story);
+                session.SaveChanges();
+                UpdateIndex(session);
+            }
+
+            StoryRepository repository = new StoryRepository(store);
+            var result = repository.AddWord(story.Id, "New", userId);
+            // Act
+
+
+            // Assert
+            Assert.AreEqual(result.ErrorCode, StoryErrorCode.TenMinuteLockWindowHasClosed);
+
+        }
 
         [Test]
         public void AddWordToNewStory()
@@ -483,7 +605,8 @@ namespace OneWordStory.Tests
             Story story = new Story();
 
             story.Paragraphs.Add("Here is the first paragraph of the story. Content doesn't really matter at the moment");
-            story.CurrentEditorId = "users/1";
+            story.Lock.UserId = "users/2";
+            story.Lock.LockedDate = DateTime.Now;
 
             IDocumentStore store = Global.GetInMemoryStore();
             StoryRepository repository = new StoryRepository(store);
@@ -503,7 +626,7 @@ namespace OneWordStory.Tests
 
             // Setup
             Story story = new Story();
-            story.CurrentEditorId = "users/1";
+            story.Lock.UserId = "users/1";
 
             IDocumentStore store = Global.GetInMemoryStore();
 
@@ -516,13 +639,15 @@ namespace OneWordStory.Tests
             StoryRepository repository = new StoryRepository(store);
 
             // Act
-            StoryErrorCode result = repository.LockStory(story.Id, "users/1");
+            StoryErrorCode result = repository.LockStory(story.Id, "users/2");
 
 
             // Assert
             Assert.AreEqual(result, StoryErrorCode.StoryLockedForEditing);
 
         }
+
+
 
         [Test]
         public void LockStoryReturnsTrueIfStoryIsNotLocked()
@@ -546,7 +671,8 @@ namespace OneWordStory.Tests
             using (var session = store.OpenSession())
             {
                 var savedStory = session.Load<Story>(story.Id);
-                Assert.AreEqual(savedStory.CurrentEditorId, "users/1");
+                Assert.AreEqual(savedStory.Lock.UserId, "users/1");
+                Assert.GreaterOrEqual(savedStory.Lock.LockedDate, DateTime.Now.AddMinutes(-1));
             }
 
             // Assert

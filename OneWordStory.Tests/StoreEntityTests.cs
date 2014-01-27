@@ -13,7 +13,7 @@ namespace OneWordStory.Tests
         {
 
             Story story = new Story();
-            story.CurrentEditorId = "blahs";
+            story.Lock.UserId = "blahs";
 
             Assert.IsTrue(story.HasEditor);
 

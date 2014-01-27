@@ -5,11 +5,10 @@
     <meta name="viewport" content="width=device-width" />
     <title>@ViewBag.Title</title>
     @Styles.Render("~/Content/css")
-    @Styles.Render("~/Content/themes/base/css");
     @Scripts.Render("~/bundles/modernizr")
     @Scripts.Render("~/bundles/jquery")
     @Scripts.Render("~/bundles/jqueryval")
-    @Scripts.Render("~/bundles/jqueryui")
+    @Scripts.Render("~/bundles/knockout")
 
 
 
@@ -44,7 +43,12 @@
         
         </div>
         
+    <div style="border: white dotted thin; clear: both">
 
+        <h4>Sessions JSON</h4>
+        <pre data-bind="text: ko.toJSON($data, null, 2)"></pre>
+
+    </div>
 
     
 

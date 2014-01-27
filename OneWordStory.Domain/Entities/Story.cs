@@ -13,7 +13,8 @@ namespace OneWordStory.Domain.Entities
 
         
         public List<string> Paragraphs { get; set; }
-        public string CurrentEditorId { get; set; }
+        
+        public StoryLock Lock { get; set; }
 
         
         [JsonIgnore]
@@ -23,7 +24,7 @@ namespace OneWordStory.Domain.Entities
             {
                 
                 if (EditHistory.Count > 0)
-                    return EditHistory[0].UserId;
+                    return EditHistory.Last().UserId;
                 else
                     return string.Empty;
                     
@@ -36,7 +37,7 @@ namespace OneWordStory.Domain.Entities
         {
             Paragraphs = new List<string>();
             EditHistory = new List<EditHistory>();
-            
+            Lock = new StoryLock();
             
         }
 
@@ -59,7 +60,7 @@ namespace OneWordStory.Domain.Entities
         {
             get
             {
-                return !string.IsNullOrEmpty(CurrentEditorId);
+                return !string.IsNullOrEmpty(Lock.UserId);
             }
         }
 
@@ -85,5 +86,11 @@ namespace OneWordStory.Domain.Entities
         public int ParagraphIndex { get; set; }
         public DateTime DateAdded { get; set; }
 
+    }
+
+    public class StoryLock
+    {
+        public string UserId { get; set; }
+        public DateTime LockedDate { get; set; }
     }
 }

@@ -8,32 +8,52 @@ using Raven.Imports.Newtonsoft.Json;
 
 namespace OneWordStory.WebUI.Models
 {
-    public class StoryPage
+    public class StoryPageView
+    {
+
+
+        public UserStoryList UserStoryList { get; set; }
+        public AddWord AddWord { get; set; }
+
+        public StoryPageView()
+        {
+            UserStoryList = new UserStoryList();
+            AddWord = new AddWord();
+        }
+        
+
+    }
+
+    public class AddWord
+    {
+
+        [Required(ErrorMessage = "Please enter a word")]
+        [RegularExpression("^[a-zA-Z0-9]+$", ErrorMessage = "Please enter only letters and/or numbers")]
+        public string Word { get; set; }
+
+        public string StoryId { get; set; }
+
+        public bool NewParagraph { get; set; }
+
+        public AddWord()
+        {
+            Word = "";
+            StoryId = "";
+        }
+
+    }
+
+    public class UserStoryList
     {
 
         public List<Story> UserStories { get; set; }
-
-        [Required(ErrorMessage="Please enter a word")]
-        [RegularExpression("^[a-zA-Z0-9]+$", ErrorMessage="Please enter only letters and/or numbers")]
-        public string WordForNewStory { get; set; }
-
-        
-
-        [JsonIgnore]
-        public Story ReadStory { get; set; }
-
         public bool IsStale { get; set; }
-
-        
-
-        public StoryPage()
+        public UserStoryList()
         {
             UserStories = new List<Story>();
         }
 
     }
-
-
     
 
 }

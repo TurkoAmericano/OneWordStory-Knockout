@@ -39,10 +39,10 @@ namespace OneWordStory.Tests
         {
 
             // Setup
-            StoryPage storyPage = new StoryPage();
+            StoryPageView storyPage = new StoryPageView();
 
             // Assert
-            Assert.IsNotNull(storyPage.UserStories);
+            Assert.IsNotNull(storyPage.UserStoryList.UserStories);
             
 
         }
@@ -102,13 +102,11 @@ namespace OneWordStory.Tests
                                   Story = FakeEntityFactory.GetGenericStory("")
                             });
 
-            mock.Setup(m => m.GetStoriesByUser(It.IsAny<string>(), 0, 0)).Returns(new GetStoriesResult());
-
+            
             var controller = new StoryController(mock.Object, new CurrentUser("users/1"));
             
-
             // Act
-            controller.CreateNewStory(new StoryPage { WordForNewStory = "Once" });
+            controller.CreateNewStory(new AddWord { Word = "Once" });
 
             // Assert
             mock.VerifyAll();

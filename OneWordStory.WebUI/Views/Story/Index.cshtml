@@ -1,4 +1,4 @@
-﻿@model OneWordStory.WebUI.Models.StoryPage
+﻿@model OneWordStory.WebUI.Models.StoryPageView
 @using Extensions;
 
 
@@ -10,149 +10,74 @@
 
 
 <div class="col-lg-3">
-<h2>Your stories</h2>
+    <h2>Your stories</h2>
 
-@using (Html.BeginForm("CreateNewStory", "Story"))
-{
-
-    <div style="display: inline;">
-        <input type="submit" id="" class="btn-default" value="Create New Story" />
+  
+    <div id="StoryList" data-bind="foreach: UserStoryList">
+       <p>
+            <a href="" data-bind="text: Preview, click: $parent.GetCurrentStory"></a>    
+        </p>
     </div>
-    
-    <div style="display: inline;">
-        @Html.TextBoxFor(m => m.WordForNewStory)
-    </div>
-    <div style="display: inline-flexbox;">
-        @Html.ValidationMessageFor(m => m.WordForNewStory)
-    </div>
-    
-    
-}
-
-<div id="StoryList"></div>
-
-
-<script type="html/template" id="ReadStoryTemplate">
-    <p>
-    <a href="javascript:getStory({STORY_ID});">{PREVIEW}</a>    
-    </p>
-</script>
-
-<script>
-
-
-    var getStory = function (id)
-    {
-
-        $.ajax({
-            url: '/Story/ReadStory/' + id,
-            dataType: 'json',
-            type: 'POST'
-        })
-        .success(function (result) {
-            
-            $('#storyBody').html('');
-
-            $.each(result.Paragraphs, function (index, value) {
-                $('#storyBody').append('<p>' + value + '</p>');
-            });
-            $('#storyBody').append(result.CurrentEditorId);
-            $('#storyBody').append('@User.Identity.Name');
-            
-
-        })
-        .error(function (xhRequest, ErrorText, thrownError) {
-
-        });
-
-
-    }
-
-
-    var displayStories = function () {
 
 
 
-        $.ajax({
-            url: '/Story/GetStories',
-            dataType: 'json',
-            type: 'POST'
-        })
-        .success(function (result) {
 
-
-            if (result.UserStories.length < 1) {
-
-                $("#StoryList").html("<p>You have no stories.</p>");
-                return;
-            }
-
-
-
-            var list = [];
-            $.each(result.UserStories, function (index, value) {
-                var template = $("#ReadStoryTemplate").clone().html();
-                var html = template.replace("{PREVIEW}", value.Preview);
-                html = html.replace("{STORY_ID}", value.Id.replace("stories\/", ""));
-                list.push(html);
-            });
-
-
-            $("#StoryList").html(list.join(""))
-
-            if (result.IsStale) {
-
-                counter++;
-                $("#StoryList").append("<span class='typeout'>Updating...</span>");
-                setTimeout(displayStories, 1000);
-            }
-
-
-        })
-        .error(function (xhRequest, ErrorText, thrownError) {
-
-        });
-    }
-
-    $(function () {
-        displayStories();
-
-    });
-
-</script>
-
-
-
-    </div>
+</div>
 
 <div class="col-lg-9">
 
 
-    <div id="storyBody">
-    You haven't selected a story to read or edit.
+    <div id="storyBody" data-bind="with: CurrentStory">
+        <span data-bind="foreach: Paragraphs">
+        <p data-bind="text: $data">
+            
+        </p>
+        </span>
+
+    <div id="lockStoryButton" data-bind="visible: $root.ShowAddWordButton">
+        <button type="button" id="lockStory" class="btn btn-primary btn-xs" data-bind="click: $root.LockStory" >Add Word</button>
     </div>
     
+    <div id="addWordForm" data-bind="visible: $root.ShowAddWordForm">
+            <p class="text-warning">
+                You have 10 minutes to add a word<p>
+                    <div class="col-lg-2">
+                        <label class="control-label" for="inputSmall">Add word</label>
+                        <input class="form-control input-sm" type="text" id="inputWord" data-bind="value: $root.WordToAdd">
+                        <button type="button" id="addWord" class="btn btn-primary btn-xs"  data-bind="click: $root.AddWord">Add</button>
+                        <input id="addParagraph" type="checkbox" data-bind="checked: $root.AddParagraph"  />
+                        Add Paragraph
+        
+                    </div>
+        </div>
 
-
-
+    <div id="addWordError" class="text-primary" data-bind="text: $root.SelectStoryError"></div>
+    
     </div>
+
+    
+        
+
+
+</div>
+
+
+
+
+
+<script>
+
+    var currentUser = "@User.Identity.Name";
+
+</script>
+<script src="~/Scripts/Views/ajaxService.js"></script>
+<script src="~/Scripts/Views/Stories/Index.DataServices.js"></script>
+<script src="~/Scripts/Views/Stories/Index.ViewModel.js"></script>
+<script src="~/Scripts/Views/Stories/Index.Functions.js"></script>
 
 <script>
 
 
 
-    $(function ()
-    {
-        $('#submit').click(function () {
-            $.ajax({
-                url: '/Story/GetStories',
-                dataType: 'json',
-                type: 'POST'
-            })
-        });
-    });
-
-
 </script>
-
 

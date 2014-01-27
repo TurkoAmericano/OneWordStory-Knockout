@@ -4,7 +4,9 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using OneWordStory.Domain.Entities;
-
+using Raven.Imports.Newtonsoft.Json;
+using Raven.Imports.Newtonsoft.Json.Converters;
+using Extensions;
 
 namespace OneWordStory.Domain.Infrastructure
 {
@@ -15,8 +17,18 @@ namespace OneWordStory.Domain.Infrastructure
         {
             Story = new Story();
         }
+
         
         public StoryErrorCode ErrorCode { get; set; }
+
+        public string ErrorCodeDescription
+        {
+            get
+            {
+                return ErrorCode.GetEnumDescription();
+            }
+        }
+
         public Story Story { get; set; }
     }
 
