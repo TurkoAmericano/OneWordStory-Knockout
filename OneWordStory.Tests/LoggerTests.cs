@@ -38,20 +38,15 @@ namespace OneWordStory.Tests
 
             DateTime date = DateTime.Now;
             Exception exception = new Exception("Here is the message");
-
-            RepositoryError error = new RepositoryError();
-            error.Exception = exception;
-            error.ErrorCode = StoryErrorCode.StoryNotFoundInRepository.ToString();
-            error.DateOfOccurence = date;
-
+                        
             // Act
-            logger.LogError(error);
+            logger.LogError(exception, "StoryNotFoundInRepository");
 
             // Assert
             using (var session = store.OpenSession())
             {
-                RepositoryError savedError = (from e in session.Query<RepositoryError>() select e).First();
-                Assert.AreEqual(savedError.DateOfOccurence, date);
+                LogError savedError = (from e in session.Query<LogError>() select e).First();
+                Assert.GreaterOrEqual(savedError.DateOfOccurence, date.AddMinutes(-1));
                 Global.PropertyValuesAreEquals(exception, savedError.Exception);
                 Assert.AreEqual(savedError.ErrorCode, "StoryNotFoundInRepository");
             }

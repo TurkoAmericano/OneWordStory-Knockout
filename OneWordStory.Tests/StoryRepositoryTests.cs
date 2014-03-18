@@ -66,7 +66,7 @@ namespace OneWordStory.Tests
 
                 session.SaveChanges();
 
-                UpdateIndex(session);
+                Global.UpdateIndex<Story>(session);
 
                 return session.Query<Story>().ToList<Story>();
 
@@ -75,14 +75,6 @@ namespace OneWordStory.Tests
 
 
 
-        private static void UpdateIndex(IDocumentSession session)
-        {
-            RavenQueryStatistics stats;
-            var results = session.Query<Story>()
-                .Statistics(out stats)
-                .Customize(x => x.WaitForNonStaleResults())
-                .ToArray();
-        }
 
         
         [Test]
@@ -100,7 +92,7 @@ namespace OneWordStory.Tests
                 }
 
                 session.SaveChanges();
-                UpdateIndex(session);
+                Global.UpdateIndex<Story>(session);
             }
 
             IStoryRepository rep = new StoryRepository(store);
@@ -134,7 +126,10 @@ namespace OneWordStory.Tests
         {
 
             // Setup
-            StoryRepository repository = new StoryRepository();
+
+            IDocumentStore store = Global.GetInMemoryStore();
+
+            StoryRepository repository = new StoryRepository(store);
             Assert.Throws<ArgumentNullException>(() => repository.GetStoryById(""));
             Assert.Throws<ArgumentNullException>(() => repository.GetStoryById(null));
 
@@ -195,7 +190,7 @@ namespace OneWordStory.Tests
             // Assert
             using (var session = store.OpenSession())
             {
-                UpdateIndex(session);
+                Global.UpdateIndex<Story>(session);
                 var resultStory = session.Load<Story>(story.Id);
                 Assert.AreEqual(resultStory.Paragraphs.Count, numberofParagraphs + 1);
                 Assert.AreEqual(resultStory.Paragraphs[numberofParagraphs], wordToAdd);
@@ -227,7 +222,7 @@ namespace OneWordStory.Tests
                 }
 
                 session.SaveChanges();
-                UpdateIndex(session);
+                Global.UpdateIndex<Story>(session);
 
                 
             }
@@ -397,7 +392,7 @@ namespace OneWordStory.Tests
             {
                 session.Store(story);
                 session.SaveChanges();
-                UpdateIndex(session);
+                Global.UpdateIndex<Story>(session);
             }
 
             // Act
@@ -430,7 +425,7 @@ namespace OneWordStory.Tests
             {
                 session.Store(story);
                 session.SaveChanges();
-                UpdateIndex(session);
+                Global.UpdateIndex<Story>(session);
             }
 
             StoryRepository repository = new StoryRepository(store);
@@ -460,7 +455,7 @@ namespace OneWordStory.Tests
             {
                 session.Store(story);
                 session.SaveChanges();
-                UpdateIndex(session);
+                Global.UpdateIndex<Story>(session);
             }
 
             StoryRepository repository = new StoryRepository(store);

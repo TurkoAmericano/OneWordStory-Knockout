@@ -18,6 +18,16 @@ namespace OneWordStory.Tests
     public static class Global
     {
 
+        public static void UpdateIndex<T>(IDocumentSession session)
+        {
+            RavenQueryStatistics stats;
+            var results = session.Query<T>()
+                .Statistics(out stats)
+                .Customize(x => x.WaitForNonStaleResults())
+                .ToArray();
+        }
+
+
         public static IDocumentStore GetInMemoryStore()
         {
             var store = new EmbeddableDocumentStore()

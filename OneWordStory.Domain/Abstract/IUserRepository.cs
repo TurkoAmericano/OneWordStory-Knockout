@@ -13,7 +13,7 @@ namespace OneWordStory.Domain.Abstract
 
 
 
-        UserErrorCode SaveUser(User user);
+        GetUserResult SaveUser(User user);
         UserErrorCode DeleteUser(string userId);
         GetUserResult GetUserById(string userId);
         GetUserResult GetUserByEmail(string email);

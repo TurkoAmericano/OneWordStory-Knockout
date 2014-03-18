@@ -12,7 +12,7 @@ using Raven.Client;
 
 namespace OneWordStory.Domain.Infrastructure
 {
-    
+
     internal class Logger
     {
 
@@ -23,11 +23,21 @@ namespace OneWordStory.Domain.Infrastructure
             _store = store;
         }
 
-        internal void LogError(RepositoryError error)
+        internal void LogError(Exception exception, string errorCode = "")
         {
+
+            LogError repoError = new LogError()
+            {
+                DateOfOccurence = DateTime.Now,
+                ErrorCode = errorCode,
+                Exception = exception
+
+            };
+
+
             using (var session = _store.OpenSession())
             {
-                session.Store(error);
+                session.Store(repoError);
                 session.SaveChanges();
             }
         }

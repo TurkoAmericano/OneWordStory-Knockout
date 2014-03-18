@@ -36,7 +36,7 @@ namespace OneWordStory.Domain.Concrete
 
 
 
-        public UserErrorCode SaveUser(User user)
+        public GetUserResult SaveUser(User user)
         {
             using (var session = _store.OpenSession())
             {
@@ -52,11 +52,11 @@ namespace OneWordStory.Domain.Concrete
                 try
                 {
                     session.SaveChanges();
-                    return UserErrorCode.Success;
+                    return new GetUserResult() { UserCode = UserErrorCode.Success, User = user };
                 }
                 catch (ConcurrencyException)
                 {
-                    return UserErrorCode.EmailAlreadyExists;
+                    return new GetUserResult() { UserCode = UserErrorCode.EmailAlreadyExists, User = new User() };
                 }
             }
         }

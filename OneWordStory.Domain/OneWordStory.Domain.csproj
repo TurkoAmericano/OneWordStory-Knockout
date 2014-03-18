@@ -84,8 +84,10 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="Abstract\IInfrastructureRepository.cs" />
     <Compile Include="Abstract\IStoryRepository.cs" />
     <Compile Include="Abstract\IUserRepository.cs" />
+    <Compile Include="Concrete\InfrastructureRepository.cs" />
     <Compile Include="Entities\BaseEntity.cs" />
     <Compile Include="Entities\RepositoryError.cs" />
     <Compile Include="Indexes\StoriesByUser.cs" />

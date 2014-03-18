@@ -13,6 +13,8 @@ using Extensions;
 using System.Web.Security;
 using OneWordStory.WebUI.Controllers.Adapters;
 using OneWordStory.WebUI.Models;
+using Facebook;
+
 
 
 namespace OneWordStory.WebUI.Controllers
@@ -21,6 +23,19 @@ namespace OneWordStory.WebUI.Controllers
     {
         //
         // GET: /Home/
+
+
+        private Uri RedirectUri
+        {
+            get
+            {
+                var uriBuilder = new UriBuilder(Request.Url);
+                uriBuilder.Query = null;
+                uriBuilder.Fragment = null;
+                uriBuilder.Path = Url.Action("FacebookCallback");
+                return uriBuilder.Uri;
+            }
+        }
 
         private IUserRepository _repository;
         private IFormsAuthentication _authWrapper;
@@ -32,9 +47,51 @@ namespace OneWordStory.WebUI.Controllers
             
         }
 
+        public ActionResult Facebook()
+        {
+            var fb = new FacebookClient();
+            var loginUrl = fb.GetLoginUrl(new
+            {
+                client_id = "643310709067274",
+                client_secret = "15c2fca2d83cac4f2d4cc116ae6eeadf",
+                redirect_uri = RedirectUri.AbsoluteUri,
+                response_type = "code",
+                scope = "email" // Add other permissions as needed
+            });
+
+            return Redirect(loginUrl.AbsoluteUri);
+        }
+
+        public ActionResult FacebookCallback(string code)
+        {
+            var fb = new FacebookClient();
+            dynamic result = fb.Post("oauth/access_token", new
+            {
+                client_id = "643310709067274",
+                client_secret = "15c2fca2d83cac4f2d4cc116ae6eeadf",
+                redirect_uri = RedirectUri.AbsoluteUri,
+                code = code
+            });
+
+            var accessToken = result.access_token;
+
+            // TODO: Authenticate User
+
+            fb.AccessToken = accessToken;
+
+            // Get the user's information
+            dynamic me = fb.Get("me?fields=first_name,last_name,id,email");
+
+            Login login = new Login() { Email = me.email, Password = Guid.NewGuid().ToString().Replace("-", "") };
+
+            return Login(login);
+            
+
+        }
+
         public ActionResult Index()
         {
-
+            
             if (User.Identity.IsAuthenticated)
                 return RedirectToAction("Index", "Story");
             else
@@ -71,7 +128,9 @@ namespace OneWordStory.WebUI.Controllers
 
             if (newUser)
             {
-                result.UserCode = _repository.SaveUser(new User() { Email = login.Email, Password = login.Password });
+                
+                result = _repository.SaveUser(new User() { Email = login.Email, Password = login.Password });
+                
             }
 
             if (LoginSuccessful(login, result) || newUser)

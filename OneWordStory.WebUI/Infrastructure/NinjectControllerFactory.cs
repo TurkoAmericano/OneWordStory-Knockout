@@ -35,6 +35,7 @@ namespace OneWordStory.WebUI.Infrastructure
             _kernel.Bind<IUserRepository>().To<UserRepository>();
             _kernel.Bind<IStoryRepository>().To<StoryRepository>();
             _kernel.Bind<IFormsAuthentication>().To<FormsAuthenticationWrapper>();
+            _kernel.Bind<IInfrastructureRepository>().To<InfrastructureRepository>();
             _kernel.Bind<IIdentity>().ToMethod(c => HttpContext.Current.User.Identity);
             
         }

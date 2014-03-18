@@ -10,7 +10,7 @@ using System.Threading.Tasks;
 namespace OneWordStory.Domain.Entities
 {
     
-    internal class RepositoryError
+    internal class LogError
     {
         public string ErrorCode { get; set; }
         public Exception Exception { get; set; }

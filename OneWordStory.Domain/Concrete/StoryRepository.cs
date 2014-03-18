@@ -146,6 +146,8 @@ namespace OneWordStory.Concrete
 
                 });
 
+                story.Lock = new StoryLock();
+
                 session.SaveChanges();
                 return new AddWordResult() { ErrorCode = StoryErrorCode.Success, Story = story }; ;
             }

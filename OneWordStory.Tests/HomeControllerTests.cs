@@ -26,14 +26,17 @@ namespace OneWordStory.Tests
             
             Mock<IUserRepository> mockRepository = new Mock<IUserRepository>();
             Mock<IFormsAuthentication> mockAuth = new Mock<IFormsAuthentication>();
+
+            User newUser = new User() { Email = email, Password = password };
+
             mockRepository.Setup(m => m.GetUserByEmail(It.Is<string>(s => s == email)))
                                 .Returns<string>(user => new GetUserResult() 
                                 { UserCode = UserErrorCode.EmailNotFoundInRepository,
-                                  User = new User() { Email = email, Password = password }
+                                  User = newUser
                                 });
 
-            mockRepository.Setup(m => m.SaveUser(It.Is<User>(u => u.Email == email &&  u.Password == password )))
-                                .Returns<User>(user => UserErrorCode.Success);
+            mockRepository.Setup(m => m.SaveUser(It.Is<User>(u => u.Email == email && u.Password == password)))
+                                .Returns<User>(userResult => new GetUserResult() { UserCode = UserErrorCode.Success, User = newUser });
 
             HomeController controller = new HomeController(mockRepository.Object, mockAuth.Object);
 
